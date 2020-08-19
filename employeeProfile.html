@@ -1,0 +1,57 @@
+<template>
+	<lightning-card title="Employees" icon-name="standard:employee_organization">
+		<div class="slds-card__body_inner">
+			<!-- Start employee list -->
+			<template if:true={employees.data}>
+				<lightning-input type="search"
+								 onchange={handleSearchTermChange}
+								 variant="label-hidden"
+								 class="slds-var-m-bottom_small"
+								 label="Search"
+								 placeholder="Search for employees"
+								 value={searchTerm}>
+				</lightning-input>
+				<lightning-layout multiple-rows="true" pull-to-boundary="small">
+					<template for:each={employees.data} for:item="employee">
+						<lightning-layout-item key={employee.Id} size="3" class="slds-var-p-around_x-small">
+							<!-- Start employee tile -->
+							
+							<lightning-card title={employee.Name} class="employee-tile">
+								<div class="slds-var-p-horizontal_small employee-tile-body">
+									<div class="slds-media">
+										<!-- <div class="slds-media__figure">
+											<img src={appResources.employeeProfileImage} alt="Employee profile" class="employee-profile-image"/>
+										</div>  -->
+										<div class="slds-media__body">
+											<!-- <p class="slds-var-m-bottom_xx-small slds-truncate"><lightning-formatted-rich-text value = {Profile_Photo__c}></lightning-formatted-rich-text></p> -->
+											<img src={employee.Image_URL__c} alt="Employee profile" class="employee-profile-image"/>
+											<p class="slds-var-m-bottom_xx-small slds-truncate">{employee.Email__c}</p>
+											<p class="slds-var-m-bottom_xx-small slds-truncate">{employee.Project__c.Name}</p>
+											<p class="slds-var-m-bottom_xx-small slds-truncate">{employee.Location__c}</p>
+											<lightning-button label="View Details" class="slds-var-m-bottom_xx-small" onclick={handleEmployeeDetails} value={employee.Id}></lightning-button>
+										</div>
+										<!-- <lightning-button label="View Datails" onclick={handleEmployeeDetails} value={employee.Id}></lightning-button> -->
+									</div>
+								</div>
+							</lightning-card>
+							<!-- End employee tile -->
+						</lightning-layout-item>
+					</template>
+				</lightning-layout>
+				<!-- No employees found -->
+				<template if:false={hasResults}>
+					<div class="slds-align_absolute-center slds-var-m-vertical_small">
+						No results found...
+					</div>
+			</template>
+			</template>
+			<!-- End employee list -->
+			<!-- Data failed to load -->
+			<template if:true={error}>
+				<div class="slds-text-color_error">
+					An error occurred while loading the employee list
+				</div>
+			</template>
+		</div>
+	</lightning-card>
+</template>
