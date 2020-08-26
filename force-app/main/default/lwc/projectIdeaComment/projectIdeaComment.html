@@ -1,0 +1,36 @@
+<template>
+
+    
+    
+        <br><br>
+
+        <template if:true={commentbox}>
+    <lightning-card title="Feedback">
+
+        <lightning-input label="Write your feedback" onchange={onCommentHandler}></lightning-input>
+        <lightning-button label="Post" onclick={submitComment}></lightning-button>
+
+    </lightning-card>
+    
+
+    <template if:true={comments.data}>
+        <template for:each={comments.data} for:item='c'>
+            <lightning-card key={c.Id}>
+    <lightning-layout key={c.Id}>
+                   
+            <lightning-layout-item padding="around-small" border="1">
+                <div class="header-column">
+                    <p  style="color:blue;" key={c.Id} class="field-title" title="Field 1">{c.Submitter_Name__c}</p>
+                    <p key={c.Id}>{c.text__c}</p>
+                </div>
+            </lightning-layout-item>
+            </lightning-layout>
+        </lightning-card>
+          
+    </template>
+    
+
+        </template>
+        </template>
+    
+</template>
