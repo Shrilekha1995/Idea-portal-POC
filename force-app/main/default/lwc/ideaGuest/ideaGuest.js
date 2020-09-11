@@ -1,16 +1,24 @@
-import { LightningElement,wire,track } from 'lwc';
+import { LightningElement,wire,track ,api} from 'lwc';
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
 import Name_FIELD from '@salesforce/schema/Idea__c.Name';
-//import Technology__c_FIELD from '@salesforce/schema/Project_Idea__c.Technology__c';
+import Technology__c_FIELD from '@salesforce/schema/Idea__c.Technology__c';
 import Description__c_FIELD from '@salesforce/schema/Idea__c.Description__c';
-import Employee__c_FIELD from '@salesforce/schema/Idea__c.Employee__c';
+import empId__c_FIELD from '@salesforce/schema/Idea__c.empId__c';
 import employeeIdExist from '@salesforce/apex/Project_Idea_Lightning.employeeIdExist';
 import getProjectIdeas from '@salesforce/apex/Project_Idea_Lightning.getProjectIdeas';
 import Status_c_FIELD from '@salesforce/schema/Idea__c.Status__c';
 import { CurrentPageReference } from 'lightning/navigation';
 import searchIdeaByName from '@salesforce/apex/Project_Idea_Lightning.searchIdeaByName';
 import { refreshApex } from '@salesforce/apex';
-import updateIdeas from '@salesforce/apex/UpdateIdea.updateIdeas';
+import myIdeas from '@salesforce/apex/Project_Idea_Lightning.myIdeas';
+import authenticate from '@salesforce/apex/Project_Idea_Lightning.authenticate';
+import getRejectedIdeas from '@salesforce/apex/Project_Idea_Lightning.getRejectedIdeas';
+import getTasks from '@salesforce/apex/Project_Idea_Lightning.getTasks';
+import getApprovedIdeas from '@salesforce/apex/Project_Idea_Lightning.getApprovedIdeas';
+import getScoreBoard from '@salesforce/apex/Project_Idea_Lightning.getScoreBoard';
+
+
+
 
 
 import {   registerListener,
@@ -28,17 +36,34 @@ const actions= [
     
 ];
 export default class IdeaGuest extends LightningElement {
-    @track isModalOpen = false;
-    iname = '';
-    ides = '';
+    password='';
+    @api editrecordId;
+    @track openmodel = false;
+    myideas='';
     ideas='';
+    Searchkey='';
+    rejectedflag=false;
+    approvedflag=false;
+    scoreflag=false;
+    taskflag=false;
     @wire(CurrentPageReference) pageRef;
-    @wire(getProjectIdeas,{employeeId:'$empId'})ideas; 
+    @wire(getProjectIdeas,{SearchKey:'$Searchkey'})ideas; 
+    @wire(myIdeas,{employeeId:'$empId'})myideas;
+    @wire(getRejectedIdeas)rejectedIdeas; 
+    @wire(getApprovedIdeas)approvedIdeas;
+    @wire(getTasks,{employeeId:'$empId'})tasks;
+    @wire(getScoreBoard)scores;
+
     createflag=false;
     flag=false;
     fileflag=false;
     uploadbutton=false;
-    fields = [Name_FIELD,Description__c_FIELD];
+
+
+
+
+    
+    fields = [Name_FIELD,Description__c_FIELD,empId__c_FIELD,Technology__c_FIELD];
      recordId;
      empId='';
      optionflag=false;
@@ -49,18 +74,197 @@ export default class IdeaGuest extends LightningElement {
      @wire(CurrentPageReference) pageRef;
      MAX_FILE_SIZE = 1000;//1KB
 
-     columns = [{
-        label: 'Project Idea Name',
-        fieldName: 'Name',
-        type: 'text',
-        sortable: true
 
+     scorecolumn=[{
+        label: 'Name',
+        fieldName: 'Name',
+        type: 'text'
+        
+
+    },
+    {
+        label: 'Submitted By',
+        fieldName: 'Submitter_Name__c',
+        type: 'text'
+       
+    },
+    {
+        label: 'Score',
+        fieldName: 'Score__c',
+        type: 'text'
+       
+    }
+];
+
+     columntask=[{
+        label: 'Name',
+        fieldName: 'Name',
+        type: 'text'
+        
+
+    },
+    {
+        label: 'Start Date',
+        fieldName: 'Start_Date__c',
+        type: 'date'
+       
+    },
+    {
+        label: 'End Date',
+        fieldName: 'End_Date__c',
+        type: 'Date'
+       
+    },
+    {
+        label: 'Priority',
+        fieldName: 'Priority__c',
+        type: 'text'
+       
     },
     {
         label: 'Status',
         fieldName: 'Status__c',
+        type: 'text'
+       
+    },
+    {
+        label: 'Project',
+        fieldName: 'Project__c',
+        type: 'text'
+       
+    }
+     ];
+
+     ApprovedIdeacolumn=[
+
+        {
+            label: 'Project Idea Name',
+            fieldName: 'Name',
+            type: 'text',
+            wrapText: true
+            
+    
+        },
+        {
+            label: 'Submitted By',
+            fieldName: 'Submitter_Name__c',
+            type: 'text'
+           
+        },
+        {
+            label: 'Technology',
+            fieldName: 'Technology__c',
+            type: 'text'
+           
+        },
+        {
+            label: 'Score',
+            fieldName: 'Score__c',
+            type: 'text'
+           
+        },
+    
+        {
+            label: 'Status',
+            fieldName: 'Status__c',
+            type: 'text'
+           
+        },{
+    
+            label: 'Project Details',
+            fieldName: 'Project_Details__c',
+            type: 'text',
+            wrapText: true
+    
+        },
+        {
+            label: '',
+        type : 'action',
+        typeAttributes: {rowActions: actions}
+    }
+
+     ];
+
+     RejectIdeacolumns=[{
+        label: 'Project Idea Name',
+        fieldName: 'Name',
+        type: 'text'
+        
+
+    },
+    {
+        label: 'Submitted By',
+        fieldName: 'Submitter_Name__c',
+        type: 'text'
+       
+    },
+    {
+        label: 'Technology',
+        fieldName: 'Technology__c',
+        type: 'text'
+       
+    },
+    {
+        label: 'Score',
+        fieldName: 'Score__c',
+        type: 'text'
+       
+    },
+
+    {
+        label: 'Status',
+        fieldName: 'Status__c',
+        type: 'text'
+       
+    },{
+
+        label: 'Reason',
+        fieldName: 'Reason__c',
         type: 'text',
-        sortable: true
+        wrapText: true
+
+    },
+    {
+        label: '',
+    type : 'action',
+    typeAttributes: {rowActions: actions}
+}
+  
+];
+
+
+
+     columns = [{
+        label: 'Project Idea Name',
+        fieldName: 'Name',
+        type: 'text'
+        
+
+    },
+    {
+        label: 'Submitted By',
+        fieldName: 'Submitter_Name__c',
+        type: 'text'
+       
+    },
+    {
+        label: 'Technology',
+        fieldName: 'Technology__c',
+        type: 'text'
+       
+    },
+    {
+        label: 'Score',
+        fieldName: 'Score__c',
+        type: 'text'
+       
+    },
+
+    {
+        label: 'Status',
+        fieldName: 'Status__c',
+        type: 'text'
+       
     },
     {
         label: '',
@@ -75,6 +279,16 @@ refreshingApex(){
     return refreshApex(this.ideas);
 }
 
+refreshMyIdea(){
+    return refreshApex(this.myideas);
+}
+
+checkpassword(event){
+    this.password=event.target.value;
+
+}
+
+
 
 connectedCallback(){
         
@@ -85,12 +299,17 @@ connectedCallback(){
         console.log('err'+err.body.message);
     })*/
 }
-
+backtomenu(){
+    this.flag=false;
+    this.optionflag=true;
+}
 
 onComment(event){
     this.comment=event.target.value;
 }
+handlerejectedideas(){
 
+}
 rowHandler(event){
 
 
@@ -111,6 +330,8 @@ if(event.detail.action.name=='show_details'){
       
 }
 
+
+
 /*if(event.detail.action.name=='review'){
 
     fireEvent(this.pageRef,'showReview',event.detail.row.Id);
@@ -130,8 +351,8 @@ if(event.detail.action.name=='Comments'){
 }  
 
 if(event.detail.action.name=='edit'){
-this.recordId = row.Id;
-this.isModalOpen = true;
+this.editrecordId = event.detail.row.Id;
+this.openmodel = true;
 }
 
 
@@ -152,14 +373,23 @@ handleNameSearch(){
 
 }
 
+handleApprovedNameSearch(){
+
+}
+
 handleName(event)
 {
   this.Name=event.target.value;
 }
-    onCreate(){
+onCreate(){
         this.flag=true;
-        this.createflag=false;
+  
         this.optionflag=false;
+        this.showideaflag=false;
+        this.taskflag=false;
+        this.rejectedflag=false;
+        this.approvedflag=false;
+        this.scoreflag=false;
     }
     get acceptedFormats() {
         return ['.pdf', '.png','.jpg','.jpeg'];
@@ -174,7 +404,7 @@ handleName(event)
     checkemp(){
         
         console.log('in check emp'+this.empId);
-        employeeIdExist({'empId':this.empId}).then((response)=>{
+      /*  employeeIdExist({'empId':this.empId}).then((response)=>{
             console.log(JSON.stringify(response));
             this.optionflag=true;
             this.checkId=false;
@@ -185,7 +415,7 @@ handleName(event)
     }).catch((err)=>{
         console.log('err'+err.body.message);
     })
-    /**end get ideas */
+    /**end get ideas 
       }).catch((err)=>{
           console.log('err'+err.body.message);
 
@@ -197,7 +427,33 @@ handleName(event)
         });
         this.dispatchEvent(evt);
 
-      })
+      })*/
+
+      let emp= { 'sobjectType': 'Employee__c' };
+      emp.Employee_ID__c= this.empId;
+       emp.Password__c=this.password;
+       
+        console.log('emp'+JSON.stringify(emp));
+
+        authenticate({newemp:emp}).then((response)=>{
+            console.log(JSON.stringify(response));
+            if(response==null){
+                throw new Error('Employee ID or password does not match');
+            }
+            this.optionflag=true;
+            this.checkId=false;
+        }).catch((err)=>{
+           // console.log('err'+err.body.message);
+  
+            const evt = new ShowToastEvent({
+              title: 'Error',
+              message: 'Employee ID or password does not match',
+              variant: 'error',
+              mode: 'dismissable'
+          });
+          this.dispatchEvent(evt);
+  
+        })
 
     }
     handleUploadFinished(event) {
@@ -218,7 +474,25 @@ handleName(event)
             }),
         );
     }
+
+    handlemyIdeas(){
+
+        myIdeas({'employeeId':empId}).then((data)=>{
+            console.log('data'+JSON.stringify(data));
+            this.myideas=data;
+        }).catch((err)=>{
+            console.log('err'+err.body.message);
+        })
+
+
+
+    }
+
+
+
     handleSuccess(event) {
+
+
 
         this.flag=false;
         this.uploadbutton=true;
@@ -245,13 +519,59 @@ handleName(event)
 
     showIdeas(){
         this.refreshingApex();
-        this.optionflag=false;
+      //  this.optionflag=true;
         this.showideaflag=true;
+        this.approvedflag=false;
+        this.rejectedflag=false;
+        this.taskflag=false;
+        this.scoreflag=false;
 
     }
 
+    handlemytasks(){
+
+        refreshApex(this.tasks);
+       // this.optionflag=false;
+        this.taskflag=true;
+        this.rejectedflag=false;
+        this.approvedflag=false;
+        this.showideaflag=false;
+        this.scoreflag=false;
+    
+
+    }
+handlerejectedideas(){
+    refreshApex(this.rejectedIdeas);
+   // this.optionflag=false;
+    this.rejectedflag=true;
+    this.approvedflag=false;
+    this.showideaflag=false;
+    this.taskflag=false;
+    this.scoreflag=false;
+
+
+}
+
+handlescoreboard(){
+    this.rejectedflag=false;
+    this.approvedflag=false;
+    this.showideaflag=false;
+    this.taskflag=false;
+    this.scoreflag=true;
+    refreshApex(this.scores);
+}
+handleapprovedIdeas(){
+    refreshApex(this.approvedIdeas);
+    this.approvedflag=true;
+    this.rejectedflag=false;
+    this.showideaflag=false;
+    this.taskflag=false;
+    this.scoreflag=false;
+
+}
     closeModal() {
-        this.isModalOpen = false;
+        this.openmodel = false;
+        this.refreshingApex();
     }
     submitDetails() {
         console.log(this.iname+this.ides);

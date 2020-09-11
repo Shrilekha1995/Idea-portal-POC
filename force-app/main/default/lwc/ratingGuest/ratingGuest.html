@@ -1,8 +1,13 @@
 <template>
+    
+   
+
+
 
     <template if:true={displayflag}>
 
-    
+        <b><h1 style="font-size:30px;color:tomato;"><p>{title}</p></h1></b>
+        <br>
     <div class="acc-container">
         <lightning-record-view-form record-id={recordId} object-api-name="Idea__c">
             <div class="slds-grid">

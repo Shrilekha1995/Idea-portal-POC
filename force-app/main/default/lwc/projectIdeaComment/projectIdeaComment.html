@@ -1,15 +1,14 @@
 <template>
 
-    
-    
-        <br><br>
-
         <template if:true={commentbox}>
-    <lightning-card title="Feedback">
 
+            <b><h1 style="font-size:30px;color:tomato"><p>{title}</p></h1></b>
+            <br>
+    <lightning-card title="Feedback">
+              <form>
         <lightning-input label="Write your feedback" onchange={onCommentHandler}></lightning-input>
         <lightning-button label="Post" onclick={submitComment}></lightning-button>
-
+    </form>
     </lightning-card>
     
 

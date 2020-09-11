@@ -14,11 +14,10 @@ import {   registerListener,
     fireEvent } from 'c/pubsub';
 
 const actions= [
-    { label : 'Show details', name: 'show_details'},
+ 
     { label : 'Approve', name: 'Approve'},
-    { label : 'Reject', name: 'Reject'},
-    { label : 'Show reviews', name: 'review'},
-    { label : 'Comment', name: 'comment'}
+    { label : 'Reject', name: 'Reject'}
+ 
 
 ];
 export default class DisplayIdeaVp extends LightningElement {
@@ -34,6 +33,8 @@ export default class DisplayIdeaVp extends LightningElement {
     @track comment='';
     rid='';
     Name;
+    openmodel=false;
+    @api editrecordId;
  
 
     columns = [{
@@ -50,11 +51,29 @@ export default class DisplayIdeaVp extends LightningElement {
         },
        
         {
+            label: 'Submitted By',
+            fieldName: 'Submitter_Name__c',
+            type: 'text'
+           
+        },
+        {
+            label: 'Technology',
+            fieldName: 'Technology__c',
+            type: 'text'
+           
+        },
+        {
+            label: 'Score',
+            fieldName: 'Score__c',
+            type: 'text'
+           
+        },
+    
+        {
             label: 'Status',
             fieldName: 'Status__c',
-            type: 'text',
-            "initialWidth": 200,
-            sortable: true
+            type: 'text'
+           
         },
         {
             label: '',
@@ -109,18 +128,9 @@ export default class DisplayIdeaVp extends LightningElement {
 
        if(event.detail.action.name=='Reject'){
         console.log('in reject');
-        rejectIdea({'recordId':event.detail.row.Id}).then(()=>{
-                       console.log('in reject response ');
-                       const evt = new ShowToastEvent({
-                        title: "Project Idea has been rejected",
-                        
-                        variant: "info"
-                    });
-                    this.dispatchEvent(evt);
-                    this.refreshingApex();
-        }).catch((err)=>{
-             console.log('error'+error.body.message);
-        })
+        this.editrecordId=event.detail.row.Id;
+       this.openmodel=true;
+      
     }
 
     if(event.detail.action.name=='show_details'){
@@ -159,6 +169,28 @@ export default class DisplayIdeaVp extends LightningElement {
         }).catch((err)=>{
             console.log('err'+err.body.message);
         })
+
+    }
+
+    closeModal(){
+        this.openmodel=false;
+    }
+
+    editsuccess(){
+        this.openmodel=false;
+        rejectIdea({'recordId':this.editrecordId}).then(()=>{
+            console.log('in reject response ');
+            const evt = new ShowToastEvent({
+             title: "Project Idea has been rejected",
+             
+             variant: "info"
+         });
+         this.dispatchEvent(evt);
+         this.refreshingApex();
+}).catch((err)=>{
+  console.log('error'+error.body.message);
+})
+
 
     }
 

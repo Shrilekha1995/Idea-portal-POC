@@ -8,8 +8,10 @@ import {   registerListener,
     import { ShowToastEvent } from 'lightning/platformShowToastEvent';
   import showComments from '@salesforce/apex/Project_Idea_Lightning.showComments';
   import { refreshApex } from '@salesforce/apex';
+  import getIdeaName from '@salesforce/apex/Project_Idea_Lightning.getIdeaName';
 
 export default class ProjectIdeaComment extends LightningElement {
+    title='';
      @track ideaId='';
     @wire(showComments,{pid:'$ideaId'})comments;
     @track comment='';
@@ -41,10 +43,12 @@ export default class ProjectIdeaComment extends LightningElement {
     }
 
     hidecommentfunction(id){
+        console.log(' in handle hide comment');
    this.commentbox=false;
     }
 
     handleaddevent(obj1){
+        console.log('in add comment');
         this.commentbox=true;
         
         this.checkId=true;
@@ -60,6 +64,11 @@ export default class ProjectIdeaComment extends LightningElement {
         }).catch((err)=>{
             console.log('err'+err.body.message);
         })*/
+        getIdeaName({'ideaId':obj1.pid}).then((data)=>{
+            this.title=data;
+        }).catch((err)=>{
+            console.log('err'+err.body.message);
+        })
     
     } 
     
@@ -94,13 +103,19 @@ export default class ProjectIdeaComment extends LightningElement {
             this.dispatchEvent(evt1);
 
          
-
-
             const inputFields = this.template.querySelectorAll('form');
-
-        
             this.template.querySelector('form').reset();
-            this.comment='';
+            this.comment = '';
+
+          /*  const inputFields = this.template.querySelectorAll(
+                'lightning-input-field'
+            );
+            if (inputFields) {
+                inputFields.forEach(field => {
+                    field.reset();
+                });
+            }
+            this.comment='';*/
             }).catch((error)=>{
                 console.log('error1');
             console.log('error'+error.body.message);
