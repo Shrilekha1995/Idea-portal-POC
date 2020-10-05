@@ -1,232 +1,253 @@
 <template>
- 
+
+    <template if:true={optionflag}>
+
+        <lightning-button label="Create New Idea" variant="brand" onclick={onCreate}></lightning-button>
+        &nbsp;&nbsp;
+        <lightning-button label="Approved Ideas" variant="brand" onclick={handleapprovedIdeas}></lightning-button>
+
+        &nbsp;&nbsp;
+        <lightning-button label="Pending Ideas" variant="brand" onclick={showIdeas}></lightning-button>
+        &nbsp;&nbsp;
+        <lightning-button label="Rejected ideas" variant="brand" onclick={handlerejectedideas}></lightning-button>
+        &nbsp;&nbsp;
+        <lightning-button label="My task" variant="brand" onclick={handlemytasks}></lightning-button>
+
+        &nbsp;&nbsp;
+        <lightning-button label="Score Board" variant="brand" onclick={handlescoreboard}></lightning-button>
+      &nbsp;&nbsp;
+       
+    </template>
+    <br>
+
+    <template if:true={flag}>
+       
+            <lightning-card title="Create Idea">
+     <!-- <lightning-record-form object-api-name='Idea__c' fields={fields} onsuccess={handleSuccess}>
+        </lightning-record-form>-->
+
+        <lightning-record-edit-form object-api-name="Idea__c" onsubmit={handlesubmitIdea} onsuccess={handleSuccess}>
+            <lightning-messages></lightning-messages>
+
+               <!--  <lightning-input-field   field-name="Name">-->
+            <lightning-input-field  placeholder="Placeholder text…" required=""  aria-describedby="form-error-01" aria-invalid="true" field-name="Name">
+            </lightning-input-field>
+            <lightning-input-field field-name="Description__c">
+       
+            </lightning-input-field>
+            <div class="slds-hide">
+            <lightning-input-field field-name="empId__c" value={empId}>
+       
+            </lightning-input-field></div>
+            <lightning-input-field field-name="Technology__c">
+       
+            </lightning-input-field>
+           
+
+            
+            <lightning-button variant="brand" class="slds-m-top_small" label="Cancel" onclick={handleReset}></lightning-button>&nbsp;&nbsp;&nbsp;&nbsp;
+
+    <lightning-button variant="brand"  class="slds-m-top_small"
+    type="submit"
+    label="Save"></lightning-button>
+            </lightning-record-edit-form>
+     <br><br>
+        <lightning-button label="Back to menu" variant="brand" onclick={backtomenu}></lightning-button>
+        </lightning-card>
     
-
-    
-
-    <template if:true={checkId}>
-        <div class="slds-size--1-of-2">
-        <lightning-card title="Enter Credentials">
-        <lightning-input label="Enter Employee Id" onchange={checkEmployeeId}></lightning-input>
-        <lightning-input type="password" label="Password" onchange={checkpassword}></lightning-input>
-        <lightning-button label="Submit" onclick={checkemp}></lightning-button>
-    </lightning-card>
-    </div>
-        </template>
-
-        <template if:true={optionflag}>
-          
-            <lightning-button label="Create New Idea" onclick={onCreate}></lightning-button>
-            &nbsp;&nbsp;
-            <lightning-button label="Approved Ideas" onclick={handleapprovedIdeas}></lightning-button>
-          
-            &nbsp;&nbsp;
-            <lightning-button label="Pending Ideas" onclick={showIdeas}></lightning-button>
-            &nbsp;&nbsp;
-            <lightning-button label="Rejected ideas" onclick={handlerejectedideas}></lightning-button>
-            &nbsp;&nbsp;
-            <lightning-button label="My task" onclick={handlemytasks}></lightning-button>
-
-            &nbsp;&nbsp;
-            <lightning-button label="Score Board" onclick={handlescoreboard}></lightning-button>
-            </template>
-            <br>
-
-<template if:true={flag}>  
+    </template>
 
 
     
+    <template if:true={uploadbutton}>
+      
+        <lightning-button label="Upload document" onclick={uploadDocument}></lightning-button>
+        <lightning-button label="Cancel" onclick={cancel}></lightning-button>
+     
+    </template>
 
-<lightning-record-form
-object-api-name='Idea__c'
-fields={fields}
-onsuccess={handleSuccess}>
-</lightning-record-form>
-
-
-<lightning-button label="Back to menu" onclick={backtomenu}></lightning-button>
-</template>
-
-
-<template if:true={uploadbutton}>
-  <lightning-button label="Upload document" onclick={uploadDocument}></lightning-button>
-  <lightning-button label="Cancel"  onclick={cancel}></lightning-button>
-</template>
-   
     <template if:true={fileflag}>
-    <lightning-card  icon-name="custom:custom19">
-            <lightning-file-upload
+        <lightning-card icon-name="custom:custom19" class="borderform">
+            <!--<lightning-file-upload
                 label="Attach receipt"
                 name="fileUploader"
                 accept={acceptedFormats}
                 record-id={recordId}
                 onuploadfinished={handleUploadFinished}
                 multiple>
-        </lightning-file-upload>
+        </lightning-file-upload>-->
+        <p style="color:red">File format supported are text,pdf,excel,images,ppt and max file size is 100KB</p>
+            <lightning-input type="file" label="Attachment" accept="image/png"
+                onchange={handleFilesChange} multiple>
+            </lightning-input>
         </lightning-card>
+    </template>
+
+
+    <!--Show ideas-->
+
+    <!---->
+
+    <template if:true={showideaflag}>
+        <h2> Project Idea List</h2>
+
+
+
+        <lightning-layout multiple-rows="true" vertical-align="end">
+            <lightning-layout-item size="12" small-device-size="10" medium-device-size="8" large-device-size="6"
+                padding="around-small">
+                <div class="slds-form-element">
+                    <div class="slds-form-element__control">
+                        <lightning-input type="text" label="Enter Name" onchange={handleName}></lightning-input>
+                    </div>
+                </div>
+            </lightning-layout-item>
+            <lightning-layout-item size="12" small-device-size="2" medium-device-size="2" large-device-size="2"
+                padding="around-small">
+                <lightning-button label="Search" variant="brand" onclick={handleNameSearch}></lightning-button>
+            </lightning-layout-item>
+        </lightning-layout><br />
+        <template if:true={ideas.data}>
+            <lightning-datatable data={ideas.data} columns={columns} key-field="Id" hide-checkbox-column="true"
+                onrowaction={rowHandler}>
+            </lightning-datatable>
+
         </template>
+    </template>
+
+    <!--model start here-->
+
+    <template if:true={openmodel}>
+
+        <div class="demo-only" style="height: 640px;">
+            <section role="dialog" tabindex="-1" aria-labelledby="modal-heading-01" aria-modal="true"
+                aria-describedby="modal-content-id-1" class="slds-modal slds-fade-in-open">
+                <div class="slds-modal__container">
+                    <header class="slds-modal__header">
+                        <button class="slds-button slds-button_icon slds-modal__close slds-button_icon-inverse"
+                            title="Close" onclick={closeModal}>
+                            <lightning-icon icon-name="utility:close" size="medium">
+                            </lightning-icon>
+                            <span class="slds-assistive-text">Close</span>
+                        </button>
+                        <h2 id="modal-heading-01" class="slds-text-heading_medium slds-hyphenate">Edit Idea</h2>
+                    </header>
+                    <div class="slds-modal__content slds-p-around_medium" id="modal-content-id-1">
+                        <center>
 
 
-<!--Show ideas-->
+                            <lightning-record-edit-form object-api-name="Idea__c" record-id={editrecordId}
+                                onsuccess={closeModal}>
 
-<!---->
+                                <lightning-input-field field-name="Name">
+                                </lightning-input-field>
+                                <lightning-input-field field-name="Description__c">
+                                </lightning-input-field>
 
-<template if:true={showideaflag}>
-<h2> Project Idea List</h2>
 
+                                <lightning-button label="Cancel" variant="neutral" onclick={closeModal}>
+                                </lightning-button>&nbsp;&nbsp;&nbsp;&nbsp;
 
-
-<lightning-layout multiple-rows="true" vertical-align="end">
-<lightning-layout-item size="12" small-device-size="10" medium-device-size="8" large-device-size="6" padding="around-small">
-    <div class="slds-form-element">
-            <div class="slds-form-element__control">
-                    <lightning-input type="text" 
-                                     label="Enter Name" 
-                                     onchange={handleName} ></lightning-input>
-            </div>
-        </div> 
-</lightning-layout-item>
-<lightning-layout-item size="12" small-device-size="2" medium-device-size="2" large-device-size="2" padding="around-small">
-    <lightning-button label="Search" 
-                      variant="brand" 
-                      onclick={handleNameSearch}></lightning-button>
-</lightning-layout-item>
-</lightning-layout><br/>
-<template if:true={ideas.data}>
-<lightning-datatable data={ideas.data} columns={columns} key-field="Id"  hide-checkbox-column="true" 
-onrowaction ={rowHandler}>
-</lightning-datatable>
-
-</template>
-</template>
-
-<!--model start here-->
-
-<template if:true={openmodel}>
-
-    <div class="demo-only" style="height: 640px;">
-        <section role="dialog" tabindex="-1" aria-labelledby="modal-heading-01" aria-modal="true" aria-describedby="modal-content-id-1" class="slds-modal slds-fade-in-open">
-            <div class="slds-modal__container">
-                <header class="slds-modal__header">
-                    <button class="slds-button slds-button_icon slds-modal__close slds-button_icon-inverse" title="Close" onclick={closeModal}>
-                        <lightning-icon icon-name="utility:close" size="medium">
-                        </lightning-icon>
-                        <span class="slds-assistive-text">Close</span>
-                    </button>
-                    <h2 id="modal-heading-01" class="slds-text-heading_medium slds-hyphenate">Edit Idea</h2>
-                </header>
-                <div class="slds-modal__content slds-p-around_medium" id="modal-content-id-1">
-                    <center>
-                     
-
-                        <lightning-record-edit-form object-api-name="Idea__c" record-id={editrecordId} onsuccess={closeModal}>
-
-                            <lightning-input-field field-name="Name">
-                            </lightning-input-field>
-                            <lightning-input-field field-name="Description__c">
-                            </lightning-input-field>
-
-                            
-                    <lightning-button label="Cancel" variant="neutral" onclick={closeModal}></lightning-button>&nbsp;&nbsp;&nbsp;&nbsp;
-
-                    <lightning-button class="slds-m-top_small"
-                    type="submit"
-                    label="Update record"></lightning-button>
+                                <lightning-button class="slds-m-top_small" type="submit" label="Update record">
+                                </lightning-button>
                             </lightning-record-edit-form>
 
-                    </center>
+                        </center>
+                    </div>
+
                 </div>
-               
-            </div>
-        </section>
-        <div class="slds-backdrop slds-backdrop_open"></div>
-    </div>
+            </section>
+            <div class="slds-backdrop slds-backdrop_open"></div>
+        </div>
     </template>
-<!--model end here-->
+    <!--model end here-->
 
-<!--rejected start-->
+    <!--rejected start-->
 
 
-<template if:true={rejectedflag}>
-    <h2> Project Idea List</h2>
-    
-    
-    
-    <lightning-layout multiple-rows="true" vertical-align="end">
-    <lightning-layout-item size="12" small-device-size="10" medium-device-size="8" large-device-size="6" padding="around-small">
-        <div class="slds-form-element">
-                <div class="slds-form-element__control">
-                        <lightning-input type="text" 
-                                       
-                                         onchange={handleName} ></lightning-input>
+    <template if:true={rejectedflag}>
+        <h2> Project Idea List</h2>
+
+
+
+        <lightning-layout multiple-rows="true" vertical-align="end">
+            <lightning-layout-item size="12" small-device-size="10" medium-device-size="8" large-device-size="6"
+                padding="around-small">
+                <div class="slds-form-element">
+                    <div class="slds-form-element__control">
+                        <lightning-input type="text" onchange={handleName}></lightning-input>
+                    </div>
                 </div>
-            </div> 
-    </lightning-layout-item>
-    <lightning-layout-item size="12" small-device-size="2" medium-device-size="2" large-device-size="2" padding="around-small">
-        <lightning-button label="Search" 
-                          variant="brand" 
-                          onclick={handleRejectedNameSearch}></lightning-button>
-    </lightning-layout-item>
-    </lightning-layout><br/>
-    <template if:true={rejectedIdeas.data}>
-    <lightning-datatable data={rejectedIdeas.data} columns={RejectIdeacolumns} key-field="Id"  hide-checkbox-column="true" 
-    onrowaction ={rowHandler}>
-    </lightning-datatable>
-    
-    </template>
+            </lightning-layout-item>
+            <lightning-layout-item size="12" small-device-size="2" medium-device-size="2" large-device-size="2"
+                padding="around-small">
+                <lightning-button label="Search" variant="brand" onclick={handleRejectedNameSearch}></lightning-button>
+            </lightning-layout-item>
+        </lightning-layout><br />
+        <template if:true={rejectedIdeas.data}>
+            <lightning-datatable data={rejectedIdeas.data} columns={RejectIdeacolumns} key-field="Id"
+                hide-checkbox-column="true" onrowaction={rowHandler}>
+            </lightning-datatable>
+
+        </template>
     </template>
 
 
-<!--rejected end-->
-<!--task starts-->
-<template if:true={taskflag}>
-<template if:true={tasks.data}>
-    <lightning-datatable data={tasks.data} columns={columntask} key-field="Id"  hide-checkbox-column="true" 
-    onrowaction ={rowHandler}>
-    </lightning-datatable>
-    
-    </template>
-</template>
-<!--task end-->
+    <!--rejected end-->
+    <!--task starts-->
+    <template if:true={taskflag}>
+        <br>
+        <template if:true={allTasks}>
+            <p>{notaskmsg}</p>
+            <lightning-datatable data={allTasks} columns={columntask} key-field="Id" hide-checkbox-column="true"
+       onrowaction ={taskRowHandler}
+            
+            >
+            </lightning-datatable>
 
-<template if:true={approvedflag}>
-    <h2> Approved Idea List</h2>
-    
-    
-    
-    <lightning-layout multiple-rows="true" vertical-align="end">
-    <lightning-layout-item size="12" small-device-size="10" medium-device-size="8" large-device-size="6" padding="around-small">
-        <div class="slds-form-element">
-                <div class="slds-form-element__control">
-                        <lightning-input type="text" 
-                                       
-                                         onchange={handleName} ></lightning-input>
+        </template>
+        <template if:false={allTasks}>
+            <p>No task assigned to you.</p>
+            </template>
+    </template>
+    <!--task end-->
+
+    <template if:true={approvedflag}>
+        <h2> Approved Idea List</h2>
+
+
+
+        <lightning-layout multiple-rows="true" vertical-align="end">
+            <lightning-layout-item size="12" small-device-size="10" medium-device-size="8" large-device-size="6"
+                padding="around-small">
+                <div class="slds-form-element">
+                    <div class="slds-form-element__control">
+                        <lightning-input type="text" onchange={handleName}></lightning-input>
+                    </div>
                 </div>
-            </div> 
-    </lightning-layout-item>
-    <lightning-layout-item size="12" small-device-size="2" medium-device-size="2" large-device-size="2" padding="around-small">
-        <lightning-button label="Search" 
-                          variant="brand" 
-                          onclick={handleApprovedNameSearch}></lightning-button>
-    </lightning-layout-item>
-    </lightning-layout><br/>
-    <template if:true={approvedIdeas.data}>
-        <lightning-datatable data={approvedIdeas.data} columns={ApprovedIdeacolumn} key-field="Id"  hide-checkbox-column="true" 
-        onrowaction ={rowHandler}>
-        </lightning-datatable>
-        
+            </lightning-layout-item>
+            <lightning-layout-item size="12" small-device-size="2" medium-device-size="2" large-device-size="2"
+                padding="around-small">
+                <lightning-button label="Search" variant="brand" onclick={handleApprovedNameSearch}></lightning-button>
+            </lightning-layout-item>
+        </lightning-layout><br />
+        <template if:true={approvedIdeas.data}>
+            <lightning-datatable data={approvedIdeas.data} columns={ApprovedIdeacolumn} key-field="Id"
+                hide-checkbox-column="true" onrowaction={rowHandler}>
+            </lightning-datatable>
+
         </template>
     </template>
 
 
     <template if:true={scoreflag}>
-
+<br>
         <template if:true={scores.data}>
-            <lightning-datatable data={scores.data} columns={scorecolumn} key-field="Id"  hide-checkbox-column="true" 
-            onrowaction ={rowHandler}>
+            <lightning-datatable data={scores.data} columns={scorecolumn} key-field="Id" hide-checkbox-column="true"
+                onrowaction={rowHandler}>
             </lightning-datatable>
-            
-            </template>
+
         </template>
+    </template>
 
 </template>

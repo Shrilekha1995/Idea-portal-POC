@@ -1,5 +1,7 @@
 <template>
 	<lightning-card title="Employees" icon-name="standard:employee_organization">
+		<div class="slds-box slds-p-around_none slds-m-top_x-small slds-m-bottom_medium slds-m-horizontal_none">
+    
 		<lightning-layout multiple-rows="true" pull-to-boundary="small">
 		<template for:each={emps.data} for:item="employee">
 
@@ -12,15 +14,13 @@
 							 <div class="slds-media__figure">
 								<p class="slds-var-m-bottom_xx-small slds-truncate">
 								<lightning-formatted-rich-text value={employee.Profile_Picture__c}></lightning-formatted-rich-text>
-								</p>
+								<lightning-button label="View Details" class="slds-var-m-bottom_xx-small" onclick={handleEmployeeDetails} value={employee.Id}></lightning-button>
+							</p>
 							</div>  
 							<div class="slds-media__body">
 								<!-- <p class="slds-var-m-bottom_xx-small slds-truncate"><lightning-formatted-rich-text value = {Profile_Photo__c}></lightning-formatted-rich-text></p> -->
-								
-								<p class="slds-var-m-bottom_xx-small slds-truncate">{employee.Email__c}</p>
-								<p class="slds-var-m-bottom_xx-small slds-truncate">{employee.Project__c.Name}</p>
-								<p class="slds-var-m-bottom_xx-small slds-truncate">{employee.Location__c}</p>
-								<lightning-button label="View Details" class="slds-var-m-bottom_xx-small" onclick={handleEmployeeDetails} value={employee.Id}></lightning-button>
+					
+							
 							</div>
 							<!-- <lightning-button label="View Datails" onclick={handleEmployeeDetails} value={employee.Id}></lightning-button> -->
 						</div>
@@ -30,5 +30,6 @@
 			</lightning-layout-item>
 		</template>
 		</lightning-layout>
+		</div>
 	</lightning-card>
 </template>

@@ -4,9 +4,9 @@ import getProjectIdeasVP from '@salesforce/apex/Project_Idea_Lightning.getProjec
 import approveIdea from '@salesforce/apex/Project_Idea_Lightning.approveIdea';
 import rejectIdea from '@salesforce/apex/Project_Idea_Lightning.rejectIdea';
 import submitReviewEmp from '@salesforce/apex/Project_Idea_Lightning.submitReviewEmp';
-import searchIdeaByName from '@salesforce/apex/Project_Idea_Lightning.searchIdeaByName';
+import searchIdeaByNameVP from '@salesforce/apex/Project_Idea_Lightning.searchIdeaByNameVP';
 import Id from '@salesforce/user/Id';
-import { CurrentPageReference } from 'lightning/navigation';
+import { CurrentPageReference,NavigationMixin } from 'lightning/navigation';
 import { refreshApex } from '@salesforce/apex';
 import {   registerListener,
     unregisterListener,
@@ -16,11 +16,12 @@ import {   registerListener,
 const actions= [
  
     { label : 'Approve', name: 'Approve'},
-    { label : 'Reject', name: 'Reject'}
+    { label : 'Reject', name: 'Reject'},
+    { label: 'View Details', name:'View Details'}
  
 
 ];
-export default class DisplayIdeaVp extends LightningElement {
+export default class DisplayIdeaVp extends NavigationMixin(LightningElement) {
 
     @wire(getProjectIdeasVP) ideas;
     ideas;
@@ -32,7 +33,7 @@ export default class DisplayIdeaVp extends LightningElement {
     ratin='';
     @track comment='';
     rid='';
-    Name;
+    Name='';
     openmodel=false;
     @api editrecordId;
  
@@ -122,7 +123,14 @@ export default class DisplayIdeaVp extends LightningElement {
                       this.refreshingApex();
                      //   window.reload();
            }).catch((err)=>{
-                console.log('error'+error.body.message);
+                console.log('err'+err.body.message);
+                const evt = new ShowToastEvent({
+                    title: 'Error',
+                    message: 'In order to approve the idea, its score should be greater than 5',
+                    variant: 'Error',
+                    mode: 'dismissable'
+                });
+                this.dispatchEvent(evt);
            })
        }
 
@@ -133,10 +141,16 @@ export default class DisplayIdeaVp extends LightningElement {
       
     }
 
-    if(event.detail.action.name=='show_details'){
+    if(event.detail.action.name=='View Details'){
 
-        fireEvent(this.pageRef,'appEvent',event.detail.row.Id);
-        
+        this[NavigationMixin.Navigate]({
+            type: 'standard__recordPage',
+            attributes: {
+                recordId:  event.detail.row.Id,
+                objectApiName: 'Idea__c',
+                actionName: 'view'
+            },
+        });
           
     }
 
@@ -163,12 +177,16 @@ export default class DisplayIdeaVp extends LightningElement {
     handleNameSearch(){
           console.log('in handle name search'+this.Name);
         
-          searchIdeaByName({'Name':this.Name}).then((data)=>{
+         
+          searchIdeaByNameVP({'Name':this.Name}).then((data)=>{
             console.log('data'+JSON.stringify(data));
-            this.ideas=data;
+            this.ideas.data=data;
         }).catch((err)=>{
             console.log('err'+err.body.message);
         })
+        refreshApex(this.ideas);
+
+    
 
     }
 
@@ -196,15 +214,13 @@ export default class DisplayIdeaVp extends LightningElement {
 
     handleName(event)
     {
+        console.log('in handle name of vp '+ event.target.value);
         this.Name=event.target.value;
     }
 
 
 
-    handleTechnology(event){
-        this.technology=event.target.value;
-    }
-
+  
 
  
     

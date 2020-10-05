@@ -28,6 +28,8 @@ export default class RatingGuest extends LightningElement {
     displayflag=true;
 
     
+
+    
     refreshingApex(){
         return refreshApex(this.reviews);
 }
@@ -56,20 +58,12 @@ export default class RatingGuest extends LightningElement {
   
 ];
 
-
-
-    
-
-
     checkEmployeeId(event){
         this.empId=event.target.value;
      
      
          }
-     
-        
-           
-
+    
     connectedCallback() {
 
         console.log('in connected callvack before');
@@ -98,22 +92,8 @@ export default class RatingGuest extends LightningElement {
         }).catch((err)=>{
             console.log('err'+err.body.message);
         })
-    
-
-     /*   showReviews({'pid':this.recordId}).then((data)=>{
-            console.log('in show reviews')
-            console.log('data'+JSON.stringify(data));
-            this.reviews=data;
-            console.log('reviews'+this.reviews);
-        }).catch((err)=>{
-            console.log('err'+err.body.message);
-        })*/
         
         this.ratingflag=true;
-
-        
-  
-
         
     }
 
@@ -134,7 +114,8 @@ export default class RatingGuest extends LightningElement {
     review.empId__c=this.empId;
        
         console.log('review'+JSON.stringify(review));
-
+ if(this.comment != '')
+ {
         submitReviewEmp({newreview:review}).then((data)=>{
             console.log('in response'+JSON.stringify(data));
             console.log('in submit review response response ');
@@ -154,5 +135,16 @@ export default class RatingGuest extends LightningElement {
         //this.ratingflag=false; 
 //this.empValid=false;
     }
+    else{
+
+        const evt2 = new ShowToastEvent({
+            title: "please write a review",
+            
+            variant: "info"
+        });
+        this.dispatchEvent(evt2);
+    
+    }
+}
 
 }
